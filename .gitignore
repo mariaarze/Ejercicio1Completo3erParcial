@@ -1,28 +1,149 @@
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+#include "stdafx.h"
+#include <conio.h>
+#include <iostream>
+using namespace std;
 
-# Precompiled Headers
-*.gch
-*.pch
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+struct Empleado
+{
+	char nombre[30];
+	char fecha_ing[11];
+	float sueldo;
+};
+float calc_ant(char fecha[11],char fecha_ing[11])
+{
+	int anhos,anho_act,anho_ing;
+	anho_act = atoi(fecha + 6);
+	anho_ing = atoi(fecha_ing + 6);
+	anhos = anho_act - anho_ing;
+	return anhos;
+}
+void reporteAntiguedad(char fecha[11])
+{
+	Empleado reg;
+	FILE *ptr;
+	float antiguedad;
+	float bono;
+	ptr = fopen("Empleado.dat","rb");
+	if(ptr != NULL)
+	{
+		cout<<"============================================="<<endl;
+		cout<<"Reporte bono de antiguedad"<<endl;
+		cout<<"============================================="<<endl;
+		cout<<"fecha actual:"<<fecha<<endl;
+		cout<<"============================================="<<endl;
+		cout<<"nombre	fecha ingreso	antiguedad	monto"<<endl;
+		cout<<"============================================="<<endl;
+		fread(&reg,sizeof(reg),1,ptr);
+		while(!feof(ptr))
+		{
+			cout<<reg.nombre<<"  ";
+			cout<<reg.fecha_ing<<"  ";
+			antiguedad = calc_ant(fecha,reg.fecha_ing);
+			cout<<antiguedad<<"  ";
+			cout<<antiguedad * reg.sueldo *  5 / 100 <<"  ";
+			cout<<endl;
+			fread(&reg,sizeof(reg),1,ptr);
+		}
+		fclose(ptr);
+		cout<<"============================================="<<endl;
+	}
+}
 
-# Fortran module files
-*.mod
+void ListarEmpleado()
+{
+	Empleado reg;
+	FILE *ptr;
+	ptr = fopen("Empleado.dat","rb");
+	if(ptr != NULL)
+	{
+		cout<<"============================================="<<endl;
+		cout<<"Listado Empleados"<<endl;
+		cout<<"============================================="<<endl;
+		cout<<"nombre	fecha ingreso	sueldo"<<endl;
+		cout<<"============================================="<<endl;
+		fread(&reg,sizeof(reg),1,ptr);
+		while(!feof(ptr))
+		{
+			cout<<reg.nombre<<"  ";
+			cout<<reg.fecha_ing<<"  ";
+			cout<<reg.sueldo<<"  ";
+			cout<<endl;
+			fread(&reg,sizeof(reg),1,ptr);
+		}
+		fclose(ptr);
+		cout<<"============================================="<<endl;
+	}
+}
 
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
+bool PedirDatosEmpleado(Empleado &reg)
+{
+	char aux[100];
+	cout<<"nombre empleado:";
+	gets(reg.nombre); 
+	cout<<"fecha ingreso(DD/MM/AAAA):";
+	gets(reg.fecha_ing);
+	cout<<"sueldo:";
+	cin>>reg.sueldo;
 
-# Executables
-*.exe
-*.out
-*.app
+	return true;
+}
+
+void AdicionarEmpleado(Empleado reg)
+{
+	FILE *ptr;
+
+	ptr = fopen("Empleado.dat","ab");
+	
+	if(ptr == NULL)
+	{
+		cout<<"archivo en blanco"<<endl;
+	}
+	else
+	{
+		fwrite(&reg,sizeof(reg),1,ptr);
+		fclose(ptr);
+	}
+}
+
+int main()
+{
+	Empleado reg;
+	int opcion = -1;
+	char aux[30];
+	char fecha[11];
+	do
+	{
+		opcion = -1;
+		system("cls");
+		cout<<"\n Menu Principal";
+		cout<<"\n";
+		cout<<"\n 1. Adicionar Empleado";
+		cout<<"\n 2. Listar Empleado";
+		cout<<"\n 3. Reporte antiguedad";
+		cout<<"\n 4. Salir";
+		cout<<"\n  Elija Una Opcion: ";
+		gets(aux);
+		opcion = atoi(aux);
+		switch(opcion)
+		{
+		case 1: 
+			PedirDatosEmpleado(reg);
+			AdicionarEmpleado(reg);
+			break;
+		case 2: 
+			ListarEmpleado();
+			getch();
+			break;
+		case 3: 
+			cout<<"fecha actual:";
+			gets(fecha);
+			reporteAntiguedad(fecha); 
+			getch();
+			break;
+		}
+	}while(opcion!=4);
+	return 0;
+}
+
+
